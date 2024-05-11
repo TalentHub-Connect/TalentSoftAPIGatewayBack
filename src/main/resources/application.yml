@@ -1,0 +1,57 @@
+server:
+  port: 8762
+
+eureka:
+  instance:
+    preferIpAddress: true
+    hostname: ${HOSTNAME:localhost}
+  client:
+    registerWithEureka: true
+    fetchRegistry: true
+    serviceUrl:
+      defaultZone: ${EUREKA_URL:http://localhost:8761/eureka}
+
+spring:
+  application:
+    name: Api GateWay
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      default-filters:
+        - DedupeResponseHeader=Access-Control-Allow-Credentials Access-Control-Allow-Origin
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: ${ALLOWED_ORIGINS:*}
+            allowedHeaders: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - PATCH
+              - OPTIONS
+      routes:
+        - id: canela_plan_backend
+          uri: https://canelaplanbackend-qa.up.railway.app
+          predicates:
+            - Path=/api/planes
+
+management:
+  endpoint:
+    gateway:
+      enabled: ${ROUTE_TABLES_ENABLED:true}
+  endpoints:
+    web:
+      exposure:
+        include:
+          - '*'
+logging:
+  level:
+    root: INFO  # Cambia a DEBUG para una salida más detallada en el ambiente de desarrollo
+    org.springframework.cloud.gateway: DEBUG  # Logging específico para Spring Cloud Gateway
+    org.springframework.web: DEBUG  # Para ver detalles de las peticiones web y respuestas
+    org.springframework.security: INFO  # Si utilizas Spring Security
